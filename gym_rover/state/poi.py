@@ -4,7 +4,7 @@ import math
 import sys
 
 
-class POI():
+class POI(object):
     """ A POI (Point of Interest) is a static obstacle that an agent wants to
             observe. It records the nearest n observations, and which agents
             made them.
