@@ -45,6 +45,14 @@ class World(object):
         else:
             self._init_pois()
 
+    def get_reward(self):
+        """ Calculate and return G (as of this timestep). The global reward
+                in the rover domain is defined as, for each POI, 1 / R, where
+                R is the closest observation made by any agent. R has a min 
+                value of 1.
+        """
+        pass
+    
     def apply_discrete_actions(self, commands):
         """ Apply commands to agents. Commands are discrete.
 
