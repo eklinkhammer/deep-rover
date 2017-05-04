@@ -70,13 +70,6 @@ class RoverEnv(gym.Env):
         self.time_step = 0
         return self._get_observation()
 
-    # def create_agents(self):
-    #     self._agents = []
-    #     for _ in range(self.num_agents):
-    #         self._agents.append(Agent((random.random
-    # def create_pois(self):
-    #     pass
-
     def create_world(self):
         self._world = World(self.world_width, self.world_height,
                             self.num_agents, self.num_pois)

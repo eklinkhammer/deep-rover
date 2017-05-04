@@ -122,6 +122,6 @@ def test_get_obs_states():
 
     assert vec.shape[0] == 5
     assert vec[0][0] == 1
-    assert vec[0][6] == 1
+    assert vec[0][6] == 1 / np.sqrt(2)
     
 

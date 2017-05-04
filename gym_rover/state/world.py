@@ -49,9 +49,14 @@ class World(object):
         """ Calculate and return G (as of this timestep). The global reward
                 in the rover domain is defined as, for each POI, 1 / R, where
                 R is the closest observation made by any agent. R has a min 
-                value of 1.
+                value of 0.5.
         """
-        pass
+        reward = 0
+        for p in self._pois:
+            agent, distance = p.score_info()
+            reward += 1 / max(distance,0.5)
+
+        return reward
     
     def apply_discrete_actions(self, commands):
         """ Apply commands to agents. Commands are discrete.
@@ -65,6 +70,8 @@ class World(object):
         for i in range(self._num_agents):
             self._agents[i].discrete_move(commands[i])
 
+        self._update_scores()
+
     def apply_cont_actions(self, commands):
         """ Apply commands to agents. Commands are continuous.
 
@@ -72,11 +79,19 @@ class World(object):
             commands (np.array of np.array of doubles)
         """
 
-        assert commands.shape[0] == self._num_agents
+        assert len(commands) == self._num_agents
 
         for i in range(self._num_agents):
             self._agents[i].cont_move(commands[i])
 
+        self._update_scores()
+
+    def _update_scores(self):
+        """ Update all POIs with current best score. """
+        for p in self._pois:
+            for a in self._agents:
+                p.observe_by(a)
+                
     def get_obs_image(self, scale=1):
         """ Create an image representation of the world state.
 
@@ -170,14 +185,16 @@ class World(object):
             agent = self._agents[i]
             loc = agent.get_loc()
             for other in self._agents:
-                if np.array_equal(other.get_loc(), loc):
+                other_loc = other.get_loc()
+                if np.array_equal(other_loc, loc):
                     continue
-                quad = self._get_quad(loc, other.get_loc())
-                vectors[i][quad] += 1
+                quad = self._get_quad(loc, other_loc)
+                vectors[i][quad] += 1 / max(1, self.distance(agent, other))
 
             for poi in self._pois:
-                quad = self._get_quad(loc, poi.get_loc()) + 4
-                vectors[i][quad] += 1
+                other_loc = poi.get_loc()
+                quad = self._get_quad(loc, other_loc) + 4
+                vectors[i][quad] += 1 / max(1, self.distance(agent, poi))
 
                 
         return vectors
@@ -241,3 +258,8 @@ class World(object):
     def get_size(self):
         """ Accessor method for size of world """
         return self._size
+
+    def distance(self, a, b):
+        loc_a = a.get_loc()
+        loc_b = b.get_loc()
+        return np.sqrt(np.sum((loc_b - loc_a)**2))
