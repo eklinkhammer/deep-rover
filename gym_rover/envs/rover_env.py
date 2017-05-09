@@ -21,12 +21,12 @@ class RoverEnv(gym.Env):
         """ Rover Domain environment.
         """
 
-        self.world_height = 100
-        self.world_width = 100
+        self.world_height = 10
+        self.world_width = 10
         self.num_agents = 1
         self.num_pois = 1
 
-        self.time_limit = 30
+        self.time_limit = 10
 
         self.observation_mode = 'feature'
         self.actions = 'continuous'
@@ -49,7 +49,7 @@ class RoverEnv(gym.Env):
         return [seed]
 
     def _step(self, action):
-        assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
+        #assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
         
         if self.actions == 'continuous':
             self._world.apply_cont_actions(action)
@@ -68,6 +68,8 @@ class RoverEnv(gym.Env):
         self.set_observation_space()
         self.set_action_space()
         self.time_step = 0
+        self.create_world()
+        
         return self._get_observation()
 
     def create_world(self):

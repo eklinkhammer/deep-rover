@@ -1,6 +1,6 @@
 import numpy as np
-import keras.models import Sequential
-import keras.layers import Dense, Activation
+from keras.models import Sequential
+from keras.layers import Dense, Activation
 
 class FeedForwardNeuralNet(object):
     """ Wrapper around Keras Neural Network for Free Forward Neural Networks.
@@ -14,7 +14,7 @@ class FeedForwardNeuralNet(object):
         self._mutation_rate = mutation_rate
         self._layers = layers
         self._active_funcs = active_funcs
-        self._mutation_mag - mutation_mag
+        self._mutation_mag = mutation_mag
         
         self.num_inputs = layers[0]
         self.num_outputs = layers[-1]
@@ -33,14 +33,18 @@ class FeedForwardNeuralNet(object):
             self.model: For each layer, possibly adds noise to each neuron
         """
         for layer in self.model.layers:
-            weights = np.array(layer.get_weights())
-            n = weights.size
+            weights = layer.get_weights()
+            new_weights = []
+            for w in weights:
+                s = w.shape
+                n = w.size
 
-            N = np.random.randn(n) * self.mutation_mag
-            B = np.random.rand(n) > (1 - self.mutation_rate)
-
-            M = np.multiply(N,B)
-            layer.set_weights(np.add(weights, M))
+                N = np.random.randn(n).reshape(s) * self._mutation_mag
+                B = np.random.randn(n).reshape(s) > (1 - self._mutation_rate)
+                M = np.multiply(N,B)
+                mut = np.add(w, M)
+                new_weights.append(mut)
+            layer.set_weights(np.array(new_weights))
 
     def deep_copy(self):
         """ Copies FeedForwardNeuralNetwork, deep copying over the weight matrix
@@ -62,7 +66,7 @@ class FeedForwardNeuralNet(object):
         Mutates:
             self.model: Sets weights for all layers.
         """
-        self.model.set_weights(other.get_weights())
+        self.model.set_weights(np.copy(other.get_weights()))
         
     def get_weights(self):
         """ Wrapper for model's get_weights function.  """
