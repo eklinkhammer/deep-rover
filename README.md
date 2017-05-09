@@ -1,11 +1,15 @@
 # deep-rover
 
 ## Installation Instructions
-Install openAI's gym:
+Setup a virtual env using python 3.6
 
-pip install gym
+pip install gym keras tensorflow
 
-## Installation Instructions (Without root access)
+If you are not in a virtual env (you really should be), make sure you are using the proper version of pip and python. On OS X, the default installation is python2.6. To avoid using it, use pip3 and python3.
+
+For optimal performance, considering building tensorflow from source (https://www.tensorflow.org/install/install_sources)
+
+## Installation Instructions (How to create a virtual env without root access)
 
 In directory $DIR 
 
