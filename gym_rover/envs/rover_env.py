@@ -26,17 +26,16 @@ class RoverEnv(gym.Env):
         self.num_agents = 1
         self.num_pois = 1
 
-        self.time_limit = 10
+        self.time_limit = 20
 
         self.observation_mode = 'feature'
-        self.actions = 'continuous'
+        self.actions = 'discrete'
         
         self.set_observation_space()
         self.set_action_space()
 
-        #self.create_agents()
-        #self.create_pois()
-        self.create_world()
+        self._world = self.reset_world()
+        #self.create_world()
 
         self.viewer = None
         self.time_step = 0
@@ -44,6 +43,20 @@ class RoverEnv(gym.Env):
         self._seed()
         self.reset()
 
+    def reset_world(self):
+        agents = self.create_agents()
+        pois = self.create_pois()
+        self._world = World(self.world_width, self.world_height, self.num_agents,
+                            self.num_pois, agents, pois)
+        self._agents = self._world.get_agents()
+        self._pois = self._world.get_pois()
+        
+    def create_agents(self):
+        return np.array([Agent(np.array([3,4]))])
+
+    def create_pois(self):
+        return np.array([POI(np.array([7,9]))])
+    
     def _seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
@@ -68,7 +81,8 @@ class RoverEnv(gym.Env):
         self.set_observation_space()
         self.set_action_space()
         self.time_step = 0
-        self.create_world()
+        self.reset_world()
+        #self.create_world()
         
         return self._get_observation()
 
@@ -114,7 +128,14 @@ class RoverEnv(gym.Env):
         self.action_space = spaces.Tuple(self._all_actions)
 
     def _set_action_space_discrete(self):
-        pass
+        self._agent_action = spaces.Discrete(9)
+        self._all_actions = []
+
+        for _ in range(self.num_agents):
+            self._all_actions.append(self._agent_action)
+
+        self.action_space = spaces.Tuple(self._all_actions)
+        
     
     def _render(self, mode='human', close=False):
 
@@ -168,4 +189,9 @@ class RoverEnv(gym.Env):
 
     def _get_observation(self):
         if self.observation_mode == 'feature':
-            return self._world.get_obs_states()
+            obs = self._world.get_obs_states()
+            print (obs)
+            for i in self.num_agents:
+                obs[i][8] = self.time_limit - self.time_step
+            print (obs)
+            return obs

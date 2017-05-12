@@ -40,9 +40,9 @@ class FeedForwardNeuralNet(object):
                 n = w.size
 
                 N = np.random.randn(n).reshape(s) * self._mutation_mag
-                B = np.random.randn(n).reshape(s) > (1 - self._mutation_rate)
+                B = np.random.rand(n).reshape(s) > (1 - self._mutation_rate)
                 M = np.multiply(N,B)
-                mut = np.add(w, M)
+                mut = np.add(w, (M))
                 new_weights.append(mut)
             layer.set_weights(np.array(new_weights))
 

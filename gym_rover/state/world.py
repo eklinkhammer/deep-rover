@@ -54,7 +54,7 @@ class World(object):
         reward = 0
         for p in self._pois:
             agent, distance = p.score_info()
-            reward += 1 / max(distance,0.5)
+            reward += 1 / max(distance,0.1)
 
         return reward
     
@@ -65,7 +65,7 @@ class World(object):
             commands (np.array of ints)
         """
 
-        assert commands.size == self._num_agents
+        assert len(commands) == self._num_agents
         
         for i in range(self._num_agents):
             self._agents[i].discrete_move(commands[i])
@@ -173,13 +173,15 @@ class World(object):
         return np.array(agent_imgs)
         
     def get_obs_states(self):
-        """ Create a feature-vector representation for each agent.
+        """ Create a feature-vector representation for each agent. Vector 
+                has a trailing 0 for each agent. Used by world in RL for
+                remaining time.
 
         Returns:
             2D np array. One agent per row.
-                Row: Quadrant Count POIs, Quadrat Count Agents
+                Row: Quadrant Count POIs, Quadrat Count Agents, 0
         """
-        vectors = np.zeros((self._num_agents, 8))
+        vectors = np.zeros((self._num_agents, 9))
 
         for i in range(self._num_agents):
             agent = self._agents[i]

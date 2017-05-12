@@ -1,6 +1,7 @@
 from random import shuffle
 
 import numpy as np
+import math
 
 from gym_rover.learning.ffnet import FeedForwardNeuralNet
 
@@ -40,6 +41,10 @@ class CCEA(object):
             selection = self.tournament2
         self.selection_function = selection
 
+    def set_population(self, population):
+        """ Initializes with an existing population of FeedForwardNeuralNets """
+        self._population = population
+
     def generation(self, debug=False):
         """ Evolves the population of neural networks one generation.
             In the evolution process, the intial population is mutated. The 
@@ -57,36 +62,20 @@ class CCEA(object):
 
         # Assign Fitness
         scores = [self.fitness_evaluator.fitness(team, debug) for team in teams]
-        if debug:
-            print ('Scores: ')
-            print (scores)
-        # Select winners
-        self._population = self.selection_function(teams, scores)
-        if debug:
-            print ('Post-tournament scores: ')
-            scores2 = [self.fitness_evaluator.fitness(team, debug) for team in np.array(self._population).T.tolist()]
-            print (scores2)
-        # Breed after selection. Selection is inplace, second half of list should be
-        # discarded.
-        self.breeding_function()
-        if debug:
-            print ('Post-breeding scores: ')
-            scores2 = [self.fitness_evaluator.fitness(team, debug) for team in np.array(self._population).T.tolist()]
-            print (scores2)
-        scores.sort()
-        return scores[-3:]
+        
+        pools = np.array(teams).T.tolist()
+        scores_pools = np.array(scores).T.tolist()
+        self.tournamentN(pools, scores_pools, 4, 0.4)
+
+        return scores
 
     def best_team(self):
         teams = np.array(self._population).T.tolist()
         scores = [self.fitness_evaluator.fitness(team) for team in teams]
 
         team_scores = [sum(s) for s in scores]
-
-        teams_scores = list(zip(team_scores, teams))
-
-        teams_scores.sort(key=lambda x : x[0])
-
-        return teams_scores[0][1]
+        max_score_i = np.argmax(team_scores)
+        return sum(team_scores) / len(team_scores), team_scores[max_score_i], teams[max_score_i]
     
     def _create_population(self, layers, actives, rate):
         """ Create a population of neural networks. Populations will be 
@@ -102,36 +91,35 @@ class CCEA(object):
                 self._population[i].append(FeedForwardNeuralNet(layers, actives,
                                                                 rate))
 
-    def copy_population(self, population):
-        new_pop = []
-        for pool in population:
-            new_pool = []
-            for net in pool:
-                new_pool.append(net.deep_copy())
-            new_pop.append(new_pool)
-        return new_pop
+    def tournamentN(self, pop, scores, tournament_size, survivor_rate):
+        """ Tournament selection and breeding function.
+        """
+        survivor_count = math.floor(self._pool_size * survivor_rate)
+        if survivor_count < 1:
+            survivor_count = 1
+        for pool_i in range(self._num_pools):
+            winning_nets = {}
+            for net_i in range(survivor_count):
+                rand_indices = [math.floor(min(self._pool_size, x)) for x in np.random.rand(tournament_size) * self._pool_size]
 
-    def merge_pops(self, pop1, pop2):
-        [a.extend(b) for (a,b) in zip(pop1, pop2)]
-        return pop1
-
-    def noise(self, pop):
-        for pool in pop:
-            for net in pool:
-                net.mutate()
+                scores_rand_indices = [scores[pool_i][i] for i in rand_indices]
                 
-    def elite_noise(self):
-        # Copy weights from first half
-        for pool in self._population:
-            half_p = len(pool) // 2
-            for i in range(half_p):
-                # pool[i + half_p].copy_weights(pool[i])
-                pool[i + half_p].mutate()
+                winning_index = np.argmax(scores_rand_indices)
+                winning_net = pop[pool_i][rand_indices[winning_index]]
+                if winning_net in winning_nets:
+                    pass
+                else:
+                    winning_nets[winning_net] = 0
+                    self._population[pool_i][net_i].copy_weights(winning_net)
 
-        # # Mutate second half
-        # copies = self.copy_population(self._population)
-        # self.noise(copies)
-        # self.merge_pops(self._population, copies)
+            for new_nets in range(survivor_count + 1, self._pool_size):
+                parent_index = math.floor(np.random.rand(1) * survivor_count)
+                self._population[pool_i][new_nets].copy_weights(self._population[pool_i][parent_index])
+                self._population[pool_i][new_nets].mutate()
+                
+
+
+
 
     def tournament2(self, teams, scores):
         ''' Time for some inplace chicanery '''
@@ -152,3 +140,33 @@ class CCEA(object):
                 else:
                     pop[pool_index][net_index + half_p].copy_weights(pop[pool_index][net_index])
         return pop
+
+    def merge_pops(self, pop1, pop2):
+        [a.extend(b) for (a,b) in zip(pop1, pop2)]
+        return pop1
+
+    def noise(self, pop):
+        for pool in pop:
+            for net in pool:
+                net.mutate()
+
+    def copy_population(self, population):
+        new_pop = []
+        for pool in population:
+            new_pool = []
+            for net in pool:
+                new_pool.append(net.deep_copy())
+            new_pop.append(new_pool)
+        return new_pop
+
+
+
+
+                
+    def elite_noise(self):
+        # Copy weights from first half
+        for pool in self._population:
+            half_p = len(pool) // 2
+            for i in range(half_p):
+                # pool[i + half_p].copy_weights(pool[i])
+                pool[i + half_p].mutate()
