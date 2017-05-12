@@ -65,7 +65,7 @@ class XOR(object):
 #     else:
 #         ccea.generation()
 
-EPISODES = 500
+EPISODES = 10000
 # env = gym.make('CartPole-v0')
 # state_size = env.observation_space.shape[0]
 # action_size = env.action_space.n
@@ -91,21 +91,20 @@ EPISODES = 500
 #     agent.replay(32)
 
 if __name__ == "__main__":
-    env = gym.make('CartPole-v1')
-    env._max_episodes=5000
-    state_size = env.observation_space.shape[0]
-    action_size = env.action_space.n
+    env = gym.make('rover-v0')
+    env._max_episodes=10000
+
+    state_size = 9
+    action_size = 9
     agent = DeepQ(state_size, action_size)
     agent.render = True
-
-    scores, episodes = [], []
 
     for e in range(EPISODES):
         done = False
         score = 0
         state = env.reset()
+        state = state[0] # Agent state
         state = np.reshape(state, [1, state_size])
-        # agent.load_model("./save_model/cartpole-master.h5")
 
         while not done:
             if agent.render:
@@ -113,16 +112,15 @@ if __name__ == "__main__":
 
             # get action for the current state and go one step in environment
             action = agent.get_action(state)
-            next_state, reward, done, info = env.step(action)
+            next_state, reward, done, info = env.step(np.array([action]))
+            next_state = next_state[0]
             next_state = np.reshape(next_state, [1, state_size])
-            # if an action make the episode end, then gives penalty of -100
-            reward = reward if not done or score == 499 else -100
-
+                
             # save the sample <s, a, r, s'> to the replay memory
             agent.replay_memory(state, action, reward, next_state, done)
             # every time step do the training
             agent.train_replay()
-            score += reward
+            score = reward
             state = next_state
 
             if done:
@@ -130,12 +128,7 @@ if __name__ == "__main__":
                 agent.update_target_model()
 
                 # every episode, plot the play time
-                score = score if score == 500 else score + 100
-                print("episode:", e, "  score:", score, "  memory length:", len(agent.memory),
-                      "  epsilon:", agent.epsilon)
-
-                # if the mean of scores of last 10 episode is bigger than 490
-                # stop training
-                if np.mean(scores[-min(10, len(scores)):]) > 490:
-                    sys.exit()
+                print("episode: {:0>4d}/{} score: {:.2f} epsilon: {:.3f}".format(e, EPISODES, score, agent.epsilon))
+                #, e, "  score:", score, "  memory length:", len(agent.memory),
+                #      "  epsilon:", agent.epsilon)
 

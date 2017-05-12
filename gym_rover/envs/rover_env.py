@@ -24,7 +24,7 @@ class RoverEnv(gym.Env):
         self.world_height = 10
         self.world_width = 10
         self.num_agents = 1
-        self.num_pois = 1
+        self.num_pois = 2
 
         self.time_limit = 20
 
@@ -78,11 +78,11 @@ class RoverEnv(gym.Env):
         return obs, reward, done, {}
     
     def _reset(self):
-        self.set_observation_space()
-        self.set_action_space()
+        #self.set_observation_space()
+        #self.set_action_space()
         self.time_step = 0
-        self.reset_world()
-        #self.create_world()
+        #self.reset_world()
+        self.create_world()
         
         return self._get_observation()
 
@@ -98,11 +98,12 @@ class RoverEnv(gym.Env):
             self.set_observation_space_feature()
 
     def set_observation_space_feature(self):
-        self._box_low = np.array([0,0,0,0,0,0,0,0])
+        self._box_low = np.array([0,0,0,0,0,0,0,0,0])
         self._box_high = np.array([self.num_agents, self.num_agents,
                                    self.num_agents, self.num_agents,
                                    self.num_pois, self.num_pois,
-                                   self.num_pois, self.num_pois])
+                                   self.num_pois, self.num_pois,
+                                   20])
         
         self._box_one_obs = spaces.Box(self._box_low, self._box_high)
 
@@ -190,8 +191,6 @@ class RoverEnv(gym.Env):
     def _get_observation(self):
         if self.observation_mode == 'feature':
             obs = self._world.get_obs_states()
-            print (obs)
-            for i in self.num_agents:
+            for i in range(self.num_agents):
                 obs[i][8] = self.time_limit - self.time_step
-            print (obs)
             return obs

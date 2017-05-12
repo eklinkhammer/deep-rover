@@ -54,7 +54,7 @@ class World(object):
         reward = 0
         for p in self._pois:
             agent, distance = p.score_info()
-            reward += 1 / max(distance,0.1)
+            reward += 1 / max(distance,0.5)
 
         return reward
     
