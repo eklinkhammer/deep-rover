@@ -54,7 +54,7 @@ class World(object):
         reward = 0
         for p in self._pois:
             agent, distance = p.score_info()
-            reward += 1 / max(distance,0.5)
+            reward += 1 / max(distance,p._min_radius)
 
         return reward
     
@@ -121,6 +121,8 @@ class World(object):
             
 
         for p in self._pois:
+            if not p.visible():
+                continue
             loc = p.get_loc()
             x, y = loc[0] * scale, loc[1] * scale
             xi, yi = round(x), round(y)
@@ -194,11 +196,12 @@ class World(object):
                 vectors[i][quad] += 1 / max(1, self.distance(agent, other))
 
             for poi in self._pois:
+                if not poi.visible():
+                    continue
                 other_loc = poi.get_loc()
                 quad = self._get_quad(loc, other_loc) + 4
                 vectors[i][quad] += 1 / max(1, self.distance(agent, poi))
 
-                
         return vectors
     
     def _init_agents(self):

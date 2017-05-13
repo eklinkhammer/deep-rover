@@ -19,6 +19,8 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras.optimizers import RMSprop, Adam
 from keras import backend as K
 
+RENDER = True
+EPISODES = 10000
 class XOR(object):
     def fitness(self, networks, debug=False):
         zz = np.array([0,0]).reshape((1,2))
@@ -65,30 +67,7 @@ class XOR(object):
 #     else:
 #         ccea.generation()
 
-EPISODES = 10000
-# env = gym.make('CartPole-v0')
-# state_size = env.observation_space.shape[0]
-# action_size = env.action_space.n
 
-# agent = DeepQ(state_size, action_size, 'vector')
-
-# for e in range(EPISODES):
-#     state = env.reset()
-#     state = np.reshape(state, [1, state_size])
-#     for time in range(1000):
-#         env.render()
-#         action = agent.act(state)
-#         next_state, reward, done, _ = env.step(action)
-#         next_state = np.reshape(next_state, [1, state_size])
-#         agent.remember(state, action, reward, next_state, done)
-#         state = next_state
-#         if done or time == 999:
-#             print("episode: {}/{}, score: {}, e: {:2}".format(e, EPISODES, time,
-#                                                               agent.epsilon))
-#             break
-#     if e % 30 == 0:
-#         agent.update_target_model()
-#     agent.replay(32)
 
 if __name__ == "__main__":
     env = gym.make('rover-v0')
@@ -96,39 +75,55 @@ if __name__ == "__main__":
 
     state_size = 9
     action_size = 9
-    agent = DeepQ(state_size, action_size)
-    agent.render = True
+    num_agents = env.num_agents
+
+    # Initialize all agents
+    agents = []
+    for i in range(num_agents):
+        agents.append(DeepQ(state_size, action_size))
 
     for e in range(EPISODES):
         done = False
         score = 0
-        state = env.reset()
-        state = state[0] # Agent state
-        state = np.reshape(state, [1, state_size])
+        states = env.reset()
 
         while not done:
-            if agent.render:
+            if RENDER:
                 env.render()
 
-            # get action for the current state and go one step in environment
-            action = agent.get_action(state)
-            next_state, reward, done, info = env.step(np.array([action]))
-            next_state = next_state[0]
-            next_state = np.reshape(next_state, [1, state_size])
+            actions = []
+            for i in range(num_agents):
+                state = states[i]
+                state = np.reshape(state, [1, state_size])
+                agent = agents[i]
                 
-            # save the sample <s, a, r, s'> to the replay memory
-            agent.replay_memory(state, action, reward, next_state, done)
-            # every time step do the training
-            agent.train_replay()
+                # get action for the current state and go one step in environment
+                action = agent.get_action(state)
+                actions.append(action)
+
+            next_states, reward, done, info = env.step(np.array(actions))
+
+            for i in range(num_agents):
+                next_state = next_states[i]
+                next_state = np.reshape(next_state, [1, state_size])
+                agent = agents[i]
+                # save the sample <s, a, r, s'> to the replay memory
+                state = np.reshape(states[i], [1, state_size])
+                agent.replay_memory(state, actions[i], reward,
+                                    next_state, done)
+                # every time step do the training
+                agent.train_replay()
+                
             score = reward
             state = next_state
 
             if done:
                 # every episode update the target model to be same with model
-                agent.update_target_model()
+                for agent in agents:
+                    agent.update_target_model()
 
                 # every episode, plot the play time
-                print("episode: {:0>4d}/{} score: {:.2f} epsilon: {:.3f}".format(e, EPISODES, score, agent.epsilon))
+                print("episode: {:0>4d}/{} score: {:.2f} epsilon: {:.3f}".format(e, EPISODES, score, agents[0].epsilon))
                 #, e, "  score:", score, "  memory length:", len(agent.memory),
                 #      "  epsilon:", agent.epsilon)
 

@@ -10,7 +10,7 @@ class POI(object):
             made them.
     """
 
-    def __init__(self, loc, scoring_radius=None):
+    def __init__(self, loc, scoring_radius=None, min_radius=None):
         """ Creates a POI at position.
 
         Args:
@@ -27,10 +27,15 @@ class POI(object):
         if scoring_radius is None:
             scoring_radius = sys.maxsize
 
+        if min_radius is None:
+            min_radius = 1
+            
         self._scoring_radius = scoring_radius
-
+        self._min_radius = min_radius
+        
         self._closest_distance = None
         self._closest_agent = None
+        self._removed = False
 
     def has_been_observed(self):
         """ If an agent has ever been close enough to observe.
@@ -41,6 +46,13 @@ class POI(object):
         """
         return self._closest_agent is not None
 
+    def visible(self):
+        return not self._removed
+    
+    def remove(self):
+        """ If an agent has been within the minimum scoring radius. """
+        self._removed = True
+        
     def observe_by(self, agent):
         """ Update POI based on agent observing the POI
 
@@ -53,18 +65,26 @@ class POI(object):
         Mutates:
             _closest_distance: Set to distance between poi and agent if shorter
             _closest_agent: Set to agent if agent is now closest agent
+            _removed: If agent is within minimum distance, marks POI
         """
 
+        if not self.visible():
+            return
+        
         dist = self._distance(agent.get_loc())
         if dist < self._scoring_radius:
             if not self.has_been_observed() or dist < self._closest_distance:
-                self._closest_distance = dist
+                self._closest_distance = max(self._min_radius, dist)
                 self._closest_agent = agent.get_uuid()
+
+        if dist < self._min_radius:
+            self.remove()
 
     def reset(self):
         """ Reset POI by forgetting previous scoring agent. """
         self._closest_distance = None
         self._closest_agent = None
+        self._removed = False
         
     def get_loc(self):
         """ Accessor method for location tuple """

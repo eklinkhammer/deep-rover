@@ -5,7 +5,7 @@ import numpy as np
 import gym
 from gym import error, spaces, utils
 from gym.utils import seeding
-from gym.envs.classic_control import rendering
+
 
 from gym_rover.state.agent import Agent
 from gym_rover.state.poi import POI
@@ -15,7 +15,8 @@ class RoverEnv(gym.Env):
     metadata = {'render.modes' : ['human']}
 
     COLOR = {1 : [255,0,0],
-             2 : [0,255,255]}
+             2 : [0,255,255],
+             3 : [0,0,255]}
 
     def __init__(self):
         """ Rover Domain environment.
@@ -139,7 +140,7 @@ class RoverEnv(gym.Env):
         
     
     def _render(self, mode='human', close=False):
-
+        from gym.envs.classic_control import rendering
         if close:
             if self.viewer is not None:
                 self.viewer.close()
@@ -160,6 +161,7 @@ class RoverEnv(gym.Env):
         return self.viewer.render(return_rgb_array = mode == 'rgb_array')
 
     def _render_agents(self):
+        from gym.envs.classic_control import rendering
         for agent in self._agents:
             poly = rendering.FilledPolygon(self._agent_square(agent, 10,
                                                               self.scale_w,
@@ -168,11 +170,15 @@ class RoverEnv(gym.Env):
             self.viewer.add_onetime(poly)
 
     def _render_pois(self):
+        from gym.envs.classic_control import rendering
         for poi in self._pois:
             poly = rendering.make_circle()
             trans = (poi.get_loc()[0] * self.scale_w, poi.get_loc()[1] * self.scale_h)
             poly.add_attr(rendering.Transform(translation=trans))
-            poly.set_color(self.COLOR[2][0], self.COLOR[2][1], self.COLOR[2][2])
+            if poi.visible():
+                poly.set_color(self.COLOR[2][0], self.COLOR[2][1], self.COLOR[2][2])
+            else:
+                poly.set_color(self.COLOR[3][0], self.COLOR[3][1], self.COLOR[3][2])
             self.viewer.add_onetime(poly)
 
     def _agent_square(self, agent, side, scale_w=1, scale_h=1):
