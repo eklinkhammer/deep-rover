@@ -19,7 +19,7 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras.optimizers import RMSprop, Adam
 from keras import backend as K
 
-RENDER = True
+RENDER = False
 EPISODES = 10000
 class XOR(object):
     def fitness(self, networks, debug=False):
