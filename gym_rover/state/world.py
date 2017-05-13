@@ -45,6 +45,13 @@ class World(object):
         else:
             self._init_pois()
 
+    def pois_still_left(self):
+        for p in self._pois:
+            if p.visible():
+                return True
+
+        return False
+    
     def get_reward(self):
         """ Calculate and return G (as of this timestep). The global reward
                 in the rover domain is defined as, for each POI, 1 / R, where
@@ -54,7 +61,7 @@ class World(object):
         reward = 0
         for p in self._pois:
             agent, distance = p.score_info()
-            reward += 1 / max(distance,p._min_radius)
+            reward += 3 / max(distance,p._min_radius)
 
         return reward
     

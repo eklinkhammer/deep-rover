@@ -33,7 +33,7 @@ class DeepQ(object):
         self.learning_rate = 0.001
         self.epsilon = 1.0
         self.epsilon_decay = 0.999
-        self.epsilon_min = 0.02
+        self.epsilon_min = 0.01
         self.batch_size = 64
         self.train_start = 1000
         # create replay memory using deque
@@ -115,70 +115,4 @@ class DeepQ(object):
     def save_model(self, name):
         self.model.save_weights(name)
         
-    #     self.state_size = state_size
-    #     self.action_size = action_size
-    #     self.memory = deque(maxlen=100000)
-    #     self.gamma = 0.9
-    #     self.epsilon = 1.0
-    #     self.e_decay = 0.999
-    #     self.e_min = 0.05
-    #     self.learning_rate = 0.0001
-
-    #     if model_type == 'vector':
-    #         self.model = self._build_vector_model()
-    #         self.target_model = self._build_vector_model()
-    #     else:
-    #         pass
-
-
-    # def _huber_loss(self, target, prediction):
-    #     """ Sqrt(1 + error^2) - 1 """
-    #     error = prediction - target
-    #     return K.mean(K.sqrt(1 + K.square(error)) - 1, axis=-1)
-
-    # def _build_vector_model(self):
-    #     model = Sequential()
-    #     model.add(Dense(20, input_dim=self.state_size, activation='tanh'))
-    #     model.add(Dense(20, activation='tanh', kernel_initializer='uniform'))
-    #     model.add(Dense(self.action_size, activation='linear'))
-    #     model.compile(loss=self._huber_loss,
-    #                   optimizer=RMSprop(lr=self.learning_rate))
-    #     return model
-
-    # def update_target_model(self):
-    #     self.target_model.set_weights(self.model.get_weights())
-
-    # def remember(self, state, action, reward, next_state, done):
-    #     self.memory.append((state, action, reward, next_state, done))
-
-    # def act(self, state):
-    #     if np.random.rand() <= self.epsilon:
-    #         return random.randrange(self.action_size)
-    #     act_values = self.model.predict(state)
-    #     return np.argmax(act_values[0])
-
-    # def replay(self, batch_size):
-    #     batch_size = min(batch_size, len(self.memory))
-    #     minibatch = random.sample(self.memory, batch_size)
-    #     X = np.zeros((batch_size, self.state_size))
-    #     Y = np.zeros((batch_size, self.action_size))
-
-    #     for i in range(batch_size):
-    #         state, action, reward, next_state, done = minibatch[i]
-    #         target = self.model.predict(state)[0]
-    #         if done:
-    #             target[action] = reward
-    #         else:
-    #             a = np.argmax(self.model.predict(next_state)[0])
-    #             t = self.target_model.predict(next_state)[0]
-    #             target[action] = reward + self.gamma * t[a]
-    #         X[i], Y[i] = state, target
-    #     self.model.fit(X, Y, epochs=1, verbose=0)
-    #     if self.epsilon > self.e_min:
-    #         self.epsilon *= self.e_decay
-
-    # def load(self, name):
-    #     self.model.load_weights(name)
-
-    # def save(self, name):
-    #     self.model.save_weights(name)
+  

@@ -24,7 +24,7 @@ class RoverEnv(gym.Env):
 
         self.world_height = 10
         self.world_width = 10
-        self.num_agents = 1
+        self.num_agents = 2
         self.num_pois = 2
 
         self.time_limit = 20
@@ -74,7 +74,7 @@ class RoverEnv(gym.Env):
         
         obs = self._get_observation()
         reward = self._world.get_reward()
-        done = self.time_step > self.time_limit
+        done = self.time_step > self.time_limit or not self._world.pois_still_left()
         
         return obs, reward, done, {}
     
@@ -104,7 +104,7 @@ class RoverEnv(gym.Env):
                                    self.num_agents, self.num_agents,
                                    self.num_pois, self.num_pois,
                                    self.num_pois, self.num_pois,
-                                   20])
+                                   self.time_limit])
         
         self._box_one_obs = spaces.Box(self._box_low, self._box_high)
 

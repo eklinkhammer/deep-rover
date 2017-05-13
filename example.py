@@ -86,11 +86,12 @@ if __name__ == "__main__":
         done = False
         score = 0
         states = env.reset()
-
+        time = 0
+        
         while not done:
             if RENDER:
                 env.render()
-
+            
             actions = []
             for i in range(num_agents):
                 state = states[i]
@@ -117,6 +118,7 @@ if __name__ == "__main__":
             score = reward
             state = next_state
 
+            time += 1
             if done:
                 # every episode update the target model to be same with model
                 for agent in agents:
