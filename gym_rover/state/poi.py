@@ -81,7 +81,8 @@ class POI(object):
             self.remove()
 
     def reset(self):
-        """ Reset POI by forgetting previous scoring agent. """
+        """ Reset POI by forgetting previous scoring agent.
+            POI is also visible by all agents. """
         self._closest_distance = None
         self._closest_agent = None
         self._removed = False

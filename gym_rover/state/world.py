@@ -60,8 +60,9 @@ class World(object):
         """
         reward = 0
         for p in self._pois:
-            agent, distance = p.score_info()
-            reward += 3 / max(distance,p._min_radius)
+            if p.has_been_observed():
+                agent, distance = p.score_info()
+                reward += 3 / max(distance,p._min_radius)
 
         return reward
     
@@ -230,7 +231,7 @@ class World(object):
         """
         self._pois = []
         for _ in range(self._num_pois):
-            self._pois.append(POI(self.random_location()))
+            self._pois.append(POI(self.random_location(), self._width / 2, 1))
 
     def _get_quad(self, loc, other):
         """ Return quadrant other is in with respect to loc. Quads start at 0
