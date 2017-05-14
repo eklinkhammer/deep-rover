@@ -124,7 +124,7 @@ class World(object):
             xi, yi = round(x), round(y)
             if xi >= img_w: xi = img_w - 1
             if xi < 0: xi = 0
-            if yi > img_h: yi = img_h - 1
+            if yi >= img_h: yi = img_h - 1
             if yi < 0: yi = 0
 
             img[int(yi)][int(xi)][0] += 1

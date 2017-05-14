@@ -11,6 +11,8 @@ from gym_rover.state.agent import Agent
 from gym_rover.state.poi import POI
 from gym_rover.state.world import World
 
+from pprint import pprint
+
 class RoverEnv(gym.Env):
     metadata = {'render.modes' : ['human']}
 
@@ -18,19 +20,23 @@ class RoverEnv(gym.Env):
              2 : [0,255,255],
              3 : [0,0,255]}
 
-    def __init__(self):
+    def __init__(self, world_height=10, world_width=10, num_agents=1,
+                 num_pois=1, time_limit=20, observation_mode='image',
+                 actions='discrete', image_width=5, image_scale=1):
         """ Rover Domain environment.
         """
 
-        self.world_height = 10
-        self.world_width = 10
-        self.num_agents = 2
-        self.num_pois = 2
+        self.world_height = world_height
+        self.world_width = world_width
+        self.num_agents = num_agents
+        self.num_pois = num_pois
 
-        self.time_limit = 20
+        self.time_limit = time_limit
 
-        self.observation_mode = 'feature'
-        self.actions = 'discrete'
+        self.observation_mode = observation_mode
+        self.actions = actions
+        self.image_width = image_width
+        self.image_scale = image_scale
         
         self.set_observation_space()
         self.set_action_space()
@@ -75,7 +81,7 @@ class RoverEnv(gym.Env):
         obs = self._get_observation()
         reward = self._world.get_reward()
         done = self.time_step > self.time_limit or not self._world.pois_still_left()
-        
+
         return obs, reward, done, {}
     
     def _reset(self):
@@ -94,9 +100,10 @@ class RoverEnv(gym.Env):
         self._pois = self._world.get_pois()
 
     def set_observation_space(self):
-
         if self.observation_mode == 'feature':
             self.set_observation_space_feature()
+        elif self.observation_mode == 'image':
+            self.set_observation_space_image()
 
     def set_observation_space_feature(self):
         self._box_low = np.array([0,0,0,0,0,0,0,0,0])
@@ -114,6 +121,16 @@ class RoverEnv(gym.Env):
 
         self.observation_space = spaces.Tuple(self._all_boxes)
 
+    def set_observation_space_image(self):
+        all_images = []
+        max_count = max(self.num_pois, self.num_agents)
+        for _ in range(self.num_agents):
+            single_space = spaces.Box(low=0, high=max_count,
+                                      shape=(self.image_width, self.image_width, 2))
+            all_images.append(single_space)
+
+        self.observation_space = spaces.Tuple(all_images)
+        
     def set_action_space(self):
         if self.actions == 'continuous':
             self._set_action_space_cont()
@@ -137,7 +154,6 @@ class RoverEnv(gym.Env):
             self._all_actions.append(self._agent_action)
 
         self.action_space = spaces.Tuple(self._all_actions)
-        
     
     def _render(self, mode='human', close=False):
         from gym.envs.classic_control import rendering
@@ -200,3 +216,6 @@ class RoverEnv(gym.Env):
             for i in range(self.num_agents):
                 obs[i][8] = self.time_limit - self.time_step
             return obs
+
+        elif self.observation_mode == 'image':
+            return self._world.get_local_obs_images(self.image_width, self.image_scale)
