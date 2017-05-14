@@ -102,8 +102,8 @@ class RoverEnv(gym.Env):
         self._box_low = np.array([0,0,0,0,0,0,0,0,0])
         self._box_high = np.array([self.num_agents, self.num_agents,
                                    self.num_agents, self.num_agents,
-                                   self.num_pois, self.num_pois,
-                                   self.num_pois, self.num_pois,
+                                   6*self.num_pois, 6*self.num_pois,
+                                   6*self.num_pois, 6*self.num_pois,
                                    self.time_limit])
         
         self._box_one_obs = spaces.Box(self._box_low, self._box_high)

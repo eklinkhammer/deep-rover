@@ -19,11 +19,11 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras.optimizers import RMSprop, Adam
 from keras import backend as K
 
-RENDER = True
-EPISODES = 100000
-NUM_POIS = 2
-NUM_AGENTS = 2
-TIME_LIMIT = 20
+RENDER = False
+EPISODES = 10000
+NUM_POIS = 1
+NUM_AGENTS = 1
+TIME_LIMIT = 10
 LENGTH = 10
 
 if __name__ == "__main__":
@@ -69,7 +69,7 @@ if __name__ == "__main__":
                 actions.append(action)
 
             next_states, reward, done, info = env.step(np.array(actions))
-
+            reward -= (time * 0.1)
             for i in range(NUM_AGENTS):
                 next_state = next_states[i]
                 next_state = np.reshape(next_state, [1, state_size])

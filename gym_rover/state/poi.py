@@ -28,7 +28,7 @@ class POI(object):
             scoring_radius = sys.maxsize
 
         if min_radius is None:
-            min_radius = 1
+            min_radius = 0.5
             
         self._scoring_radius = scoring_radius
         self._min_radius = min_radius

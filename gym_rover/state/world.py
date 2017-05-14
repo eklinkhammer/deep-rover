@@ -33,6 +33,8 @@ class World(object):
 
         self._num_agents = number_agents
         self._num_pois = number_pois
+        self._poi_score = 3
+        
         if agents is not None:
             self._num_agents = len(agents)
             self._agents = agents
@@ -62,7 +64,7 @@ class World(object):
         for p in self._pois:
             if p.has_been_observed():
                 agent, distance = p.score_info()
-                reward += 3 / max(distance,p._min_radius)
+                reward += self._poi_score / max(distance,p._min_radius)
 
         return reward
     
@@ -185,7 +187,7 @@ class World(object):
     def get_obs_states(self):
         """ Create a feature-vector representation for each agent. Vector 
                 has a trailing 0 for each agent. Used by world in RL for
-                remaining time.
+                remaining time. NOW 1/R
 
         Returns:
             2D np array. One agent per row.
@@ -208,7 +210,9 @@ class World(object):
                     continue
                 other_loc = poi.get_loc()
                 quad = self._get_quad(loc, other_loc) + 4
-                vectors[i][quad] += 1 / max(1, self.distance(agent, poi))
+                vectors[i][quad] += self._poi_score / max(poi._min_radius,
+                                                          self.distance(agent,
+                                                                        poi))
 
         return vectors
     
@@ -231,7 +235,7 @@ class World(object):
         """
         self._pois = []
         for _ in range(self._num_pois):
-            self._pois.append(POI(self.random_location(), self._width / 2, 1))
+            self._pois.append(POI(self.random_location()))
 
     def _get_quad(self, loc, other):
         """ Return quadrant other is in with respect to loc. Quads start at 0

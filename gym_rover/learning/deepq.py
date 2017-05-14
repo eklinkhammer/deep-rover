@@ -34,10 +34,10 @@ class DeepQ(object):
         self.epsilon = 1.0
         self.epsilon_decay = 0.999
         self.epsilon_min = 0.01
-        self.batch_size = 128
-        self.train_start = 1000
+        self.batch_size = 64
+        self.train_start = 2000
         # create replay memory using deque
-        self.memory = deque(maxlen=2000)
+        self.memory = deque(maxlen=4000)
 
         # create main model and target model
         self.model = self.build_model()
