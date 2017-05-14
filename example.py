@@ -22,10 +22,10 @@ from keras import backend as K
 
 RENDER = False
 EPISODES = 100000
-NUM_POIS = 1
-NUM_AGENTS = 1
-TIME_LIMIT = 10
-LENGTH = 10
+NUM_POIS = 5
+NUM_AGENTS = 3
+TIME_LIMIT = 15
+LENGTH = 15
 
 if __name__ == "__main__":
     env = gym.make('rover-v0')
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     env.num_agents = NUM_AGENTS
     env.num_pois = NUM_POIS
     env.time_limit = TIME_LIMIT
-    env.image_width = 13
+    env.image_width = 15
     
     env.observation_mode = 'image'
 
@@ -47,6 +47,11 @@ if __name__ == "__main__":
     state_shape = (env.image_width, env.image_width, 2)
     action_size = 9
 
+    agents = []
+    for _ in range(NUM_AGENTS):
+        agents.append(CNNDeepQ(state_shape, action_size))
+
+        
     agent = CNNDeepQ(state_shape, action_size)
     for e in range(EPISODES):
         done = False
@@ -57,20 +62,25 @@ if __name__ == "__main__":
         while not done:
             if RENDER:
                 env.render()
-            action = agent.get_action(state)
-            next_states, reward, done, info = env.step(np.array([action]))
-            next_state = next_states[0]
-            if not next_state.shape == state_shape:
-                continue
-            agent.replay_memory(state, action, reward,
+
+            for i in range(NUM_AGENTS):
+                state = states[i]
+                agent = agents[i]
+                action = agent.get_action(state)
+                next_states, reward, done, info = env.step(np.array([action]))
+                next_state = next_states[0]
+                if not next_state.shape == state_shape:
+                    continue
+                agent.replay_memory(state, action, reward,
                                 next_state, done)
-            # every time step do the training
-            agent.train_replay()
-            score = reward
-            state = next_state
+                # every time step do the training
+                agent.train_replay()
+                score = reward
+                state = next_state
 
             if done:
-                agent.update_target_model()
+                for agent in agents:
+                    agent.update_target_model()
 
                 # every episode, plot the play time
                 print("episode: {:0>4d}/{} score: {:.2f} epsilon: {:.3f}".format(e, EPISODES, score, agent.epsilon))
