@@ -63,12 +63,19 @@ if __name__ == "__main__":
             if RENDER:
                 env.render()
 
+            actions = []
             for i in range(NUM_AGENTS):
                 state = states[i]
                 agent = agents[i]
                 action = agent.get_action(state)
-                next_states, reward, done, info = env.step(np.array([action]))
-                next_state = next_states[0]
+                actions.append(action)
+
+            next_states, reward, done, info = env.step(np.array(actions))
+
+            for i in range(NUM_AGENTS): 
+                next_state = next_states[i]
+                agent = agents[i]
+                state = states[i]
                 if not next_state.shape == state_shape:
                     continue
                 agent.replay_memory(state, action, reward,
@@ -84,6 +91,9 @@ if __name__ == "__main__":
 
                 # every episode, plot the play time
                 print("episode: {:0>4d}/{} score: {:.2f} epsilon: {:.3f}".format(e, EPISODES, score, agent.epsilon))
+
+    for i in agents:
+        i.save_model('Agent' + str(i))
 
     # # Initialize all agents
     # agents = []

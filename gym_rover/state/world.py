@@ -182,7 +182,7 @@ class World(object):
             agent_img = world_img[y_start:y_end, x_start:x_end]
             
             agent_imgs.append(agent_img)
-        return np.array(agent_imgs)
+        return agent_imgs #np.array(agent_imgs)
         
     def get_obs_states(self):
         """ Create a feature-vector representation for each agent. Vector 
