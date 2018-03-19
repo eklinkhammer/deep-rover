@@ -21,7 +21,7 @@ class RoverEnv(gym.Env):
              3 : [0,0,255]}
 
     def __init__(self, world_height=10, world_width=10, num_agents=1,
-                 num_pois=1, time_limit=20, observation_mode='image',
+                 num_pois=1, time_limit=20, observation_mode='feature',
                  actions='discrete', image_width=5, image_scale=1):
         """ Rover Domain environment.
         """
@@ -41,8 +41,8 @@ class RoverEnv(gym.Env):
         self.set_observation_space()
         self.set_action_space()
 
-        self._world = self.reset_world()
-        #self.create_world()
+        #self._world = self.reset_world()
+        self.create_world()
 
         self.viewer = None
         self.time_step = 0
@@ -80,7 +80,7 @@ class RoverEnv(gym.Env):
         
         obs = self._get_observation()
         reward = self._world.get_reward()
-        done = self.time_step > self.time_limit or not self._world.pois_still_left()
+        done = self.time_step > self.time_limit#  or not self._world.pois_still_left()
 
         return obs, reward, done, {}
     
@@ -106,12 +106,11 @@ class RoverEnv(gym.Env):
             self.set_observation_space_image()
 
     def set_observation_space_feature(self):
-        self._box_low = np.array([0,0,0,0,0,0,0,0,0])
+        self._box_low = np.array([0,0,0,0,0,0,0,0])
         self._box_high = np.array([self.num_agents, self.num_agents,
                                    self.num_agents, self.num_agents,
                                    6*self.num_pois, 6*self.num_pois,
-                                   6*self.num_pois, 6*self.num_pois,
-                                   self.time_limit])
+                                   6*self.num_pois, 6*self.num_pois])
         
         self._box_one_obs = spaces.Box(self._box_low, self._box_high)
 
@@ -147,7 +146,7 @@ class RoverEnv(gym.Env):
         self.action_space = spaces.Tuple(self._all_actions)
 
     def _set_action_space_discrete(self):
-        self._agent_action = spaces.Discrete(9)
+        self._agent_action = spaces.Discrete(8)
         self._all_actions = []
 
         for _ in range(self.num_agents):
@@ -213,8 +212,8 @@ class RoverEnv(gym.Env):
     def _get_observation(self):
         if self.observation_mode == 'feature':
             obs = self._world.get_obs_states()
-            for i in range(self.num_agents):
-                obs[i][8] = self.time_limit - self.time_step
+            # for i in range(self.num_agents):
+            #     obs[i][8] = self.time_limit - self.time_step
             return obs
 
         elif self.observation_mode == 'image':

@@ -20,12 +20,12 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras.optimizers import RMSprop, Adam
 from keras import backend as K
 
-RENDER = False
+RENDER = True
 EPISODES = 100000
-NUM_POIS = 5
-NUM_AGENTS = 3
-TIME_LIMIT = 15
-LENGTH = 15
+NUM_POIS = 1
+NUM_AGENTS = 1
+TIME_LIMIT = 5
+LENGTH = 5
 
 if __name__ == "__main__":
     env = gym.make('rover-v0')
@@ -36,7 +36,8 @@ if __name__ == "__main__":
     env.num_agents = NUM_AGENTS
     env.num_pois = NUM_POIS
     env.time_limit = TIME_LIMIT
-    env.image_width = 15
+    env.image_width = 21
+    env.image_scale = 2
     
     env.observation_mode = 'image'
 
@@ -51,8 +52,6 @@ if __name__ == "__main__":
     for _ in range(NUM_AGENTS):
         agents.append(CNNDeepQ(state_shape, action_size))
 
-        
-    agent = CNNDeepQ(state_shape, action_size)
     for e in range(EPISODES):
         done = False
         score = 0
@@ -82,7 +81,6 @@ if __name__ == "__main__":
                                 next_state, done)
                 # every time step do the training
                 agent.train_replay()
-                score = reward
                 state = next_state
 
             if done:
@@ -90,11 +88,12 @@ if __name__ == "__main__":
                     agent.update_target_model()
 
                 # every episode, plot the play time
-                print("episode: {:0>4d}/{} score: {:.2f} epsilon: {:.3f}".format(e, EPISODES, score, agent.epsilon))
+                print("episode: {:0>4d}/{} score: {:.2f} epsilon: {:.5f}".format(e, EPISODES, reward, agent.epsilon))
 
     for i in agents:
         i.save_model('Agent' + str(i))
 
+                
     # # Initialize all agents
     # agents = []
     # for i in range(NUM_AGENTS):

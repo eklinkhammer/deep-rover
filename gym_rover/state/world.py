@@ -33,7 +33,7 @@ class World(object):
 
         self._num_agents = number_agents
         self._num_pois = number_pois
-        self._poi_score = 3
+        self._poi_score = 1
         
         if agents is not None:
             self._num_agents = len(agents)
@@ -92,7 +92,7 @@ class World(object):
         assert len(commands) == self._num_agents
 
         for i in range(self._num_agents):
-            self._agents[i].cont_move(commands[i])
+            self._agents[i].cont_move(commands[0][i])
 
         self._update_scores()
 
@@ -193,8 +193,7 @@ class World(object):
             2D np array. One agent per row.
                 Row: Quadrant Count POIs, Quadrat Count Agents, 0
         """
-        vectors = np.zeros((self._num_agents, 9))
-
+        vectors = np.zeros((self._num_agents, 8))
         for i in range(self._num_agents):
             agent = self._agents[i]
             loc = agent.get_loc()

@@ -51,7 +51,6 @@ class Agent(object):
     def cont_move(self, command):
         self._loc = np.add(self._loc, command)
         
-        
     def get_uuid(self):
         """ Accessor method for unique id """
         return self._uuid

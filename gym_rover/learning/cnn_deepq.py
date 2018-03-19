@@ -12,8 +12,8 @@ from keras import backend as K
 
 class CNNDeepQ(object):
     def __init__(self, state_shape, action_size, learning_rate=0.001,
-                 discount_factor=0.99, epsilon=1.0, epsilon_decay=0.9999,
-                 epsilon_min=0.01,batch_size=64,train_start=2000,
+                 discount_factor=0.99, epsilon=1.0, epsilon_decay=0.999,
+                 epsilon_min=0.01,batch_size=64,train_start=1000,
                  memory=4000):
         
         self.state_shape = state_shape

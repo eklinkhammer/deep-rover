@@ -94,6 +94,8 @@ class CCEA(object):
     def tournamentN(self, pop, scores, tournament_size, survivor_rate):
         """ Tournament selection and breeding function.
         """
+
+        #print (["%.2f" % x for x in scores])
         survivor_count = math.floor(self._pool_size * survivor_rate)
         if survivor_count < 1:
             survivor_count = 1
@@ -102,6 +104,9 @@ class CCEA(object):
             for net_i in range(survivor_count):
                 rand_indices = [math.floor(min(self._pool_size, x)) for x in np.random.rand(tournament_size) * self._pool_size]
 
+                # print (scores)
+                # print (rand_indices)
+                # print (scores[pool_i])
                 scores_rand_indices = [scores[pool_i][i] for i in rand_indices]
                 
                 winning_index = np.argmax(scores_rand_indices)
@@ -158,10 +163,6 @@ class CCEA(object):
                 new_pool.append(net.deep_copy())
             new_pop.append(new_pool)
         return new_pop
-
-
-
-
                 
     def elite_noise(self):
         # Copy weights from first half
