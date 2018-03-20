@@ -92,7 +92,7 @@ class World(object):
         assert len(commands) == self._num_agents
 
         for i in range(self._num_agents):
-            self._agents[i].cont_move(commands[0][i])
+            self._agents[i].cont_move(commands[i])
 
         self._update_scores()
 

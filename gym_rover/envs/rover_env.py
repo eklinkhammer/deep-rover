@@ -68,7 +68,7 @@ class RoverEnv(gym.Env):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
-    def _step(self, action):
+    def step(self, action):
         #assert self.action_space.contains(action), "%r (%s) invalid" % (action, type(action))
         
         if self.actions == 'continuous':
@@ -84,7 +84,7 @@ class RoverEnv(gym.Env):
 
         return obs, reward, done, {}
     
-    def _reset(self):
+    def reset(self):
         #self.set_observation_space()
         #self.set_action_space()
         self.time_step = 0
@@ -119,6 +119,7 @@ class RoverEnv(gym.Env):
             self._all_boxes.append(self._box_one_obs)
 
         self.observation_space = spaces.Tuple(self._all_boxes)
+        print (self.observation_space)
 
     def set_observation_space_image(self):
         all_images = []
@@ -154,7 +155,7 @@ class RoverEnv(gym.Env):
 
         self.action_space = spaces.Tuple(self._all_actions)
     
-    def _render(self, mode='human', close=False):
+    def render(self, mode='human', close=False):
         from gym.envs.classic_control import rendering
         if close:
             if self.viewer is not None:

@@ -24,8 +24,8 @@ RENDER = True
 EPISODES = 100000
 NUM_POIS = 1
 NUM_AGENTS = 1
-TIME_LIMIT = 5
-LENGTH = 5
+TIME_LIMIT = 20
+LENGTH = 10
 
 if __name__ == "__main__":
     env = gym.make('rover-v0')
@@ -85,10 +85,13 @@ if __name__ == "__main__":
 
             if done:
                 for agent in agents:
-                    agent.update_target_model()
-
-                # every episode, plot the play time
+                    agent.train_replay()
+                    #agent.update_target_model()
                 print("episode: {:0>4d}/{} score: {:.2f} epsilon: {:.5f}".format(e, EPISODES, reward, agent.epsilon))
+        if e % 10 == 0:
+            for agent in agents:
+                agent.update_target_model()    
+                # every episode, plot the play time
 
     for i in agents:
         i.save_model('Agent' + str(i))
